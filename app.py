@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 from email_sender import email_sender
 import uuid
-from cloudipsp import Api, Checkout
+#from cloudipsp import Api, Checkout
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop.db'
