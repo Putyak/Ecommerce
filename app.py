@@ -39,13 +39,13 @@ def test_payments():
 
 
 @app.route('/to-cart/<int:id>')
-def add_product_to_card(id):
+def add_product_to_cart(id):
 
     data = []
     try:
         for i in session['cart_item'][0]['id']:
             data.append(i)
-        data.append(id)
+            data.append(id)
     except:
         data.append(id)
 
@@ -53,6 +53,23 @@ def add_product_to_card(id):
     session['cart_item'] = cart_item
 
     return redirect('/cart')
+
+
+@app.route('/out-cart/<int:id>')
+def product_leaves_cart(id):
+
+    data = []
+    for i in session['cart_item'][0]['id']:
+        data.append(i)
+
+    data = list(set(data))
+    data.remove(id)
+    if len(data) < 1:
+        return redirect('/delete-cart/')
+    else:
+        cart_item = [{'id': data}]
+        session['cart_item'] = cart_item
+        return redirect('/cart')
 
 
 @app.route('/test/')
@@ -74,24 +91,22 @@ def cart():
         return render_template('cart.html')
 
 
-@app.route('/cart_order/', methods=['POST'])
-def create_order():
-    if request.method == "POST":
-        name = request.form['name']
-        email = request.form['email']
-        description = request.form['description']
+@app.route('/pay_mock/', methods=['GET'])
+def pay_mock():
 
-        items = session['cart_item'][0]['id']
-        data_set = Item.query.filter(Item.id.in_(items)).all()
+    items = session['cart_item'][0]['id']
+    data_set = Item.query.filter(Item.id.in_(items)).all()
 
-        data = []
-        for i in data_set:
-            data.append(dict(title=i.title, price=i.price, description=i.description))
+    data = []
+    for i in data_set:
+        data.append(dict(title=i.title, price=i.price, description=i.description))
 
-        message = 'Name: ' + name + '\n' + 'Description: ' + description + '\n' + 'Products: ' + str(data)
-        email_sender(email, message)
+    return render_template('pay_mock.html', data=data_set)
 
-    return redirect('/delete-cart/')
+
+@app.route('/mock_result/', methods=['GET'])
+def mock_result():
+    return render_template('mock_result.html')
 
 
 @app.route('/delete-cart/')
@@ -128,6 +143,50 @@ def delete_cart():
 #     }
 #     url = checkout.url(data).get('checkout_url')
 #     return redirect(url)
+
+@app.route('/signin', methods=['POST', 'GET'])
+def sign_in():
+    if request.method == "POST":
+        email = request.form['email']
+        password = request.form['password']
+        if email == 'admin@test.com' and password == '123':
+            return redirect('/shop-list')
+        else:
+            return ('ты не авторизован -_-')
+    else:
+        return render_template('signin.html')
+
+
+@app.route('/checkout', methods=['POST', 'GET'])
+def checkout():
+    if request.method == "POST":
+        firstname = request.form['lastname']
+        lastname = request.form['lastname']
+        username = request.form['username']
+        email = request.form['email']
+        country = request.form['country']
+        city = request.form['city']
+        postalcode = request.form['postalcode']
+        address = request.form['address']
+        address2 = request.form['address2']
+
+        items = session['cart_item'][0]['id']
+        data_set = Item.query.filter(Item.id.in_(items)).all()
+
+        data = []
+        for i in data_set:
+            data.append(dict(title=i.title, price=i.price, description=i.description))
+
+        message = 'Name: ' + firstname + '\n' + 'Last name:' + lastname + '\n' + 'User name: ' + username + '\n' + 'Products: ' + str(data)
+        email_sender(email, message)
+
+        return redirect('/pay_mock/')
+
+
+
+    items = session['cart_item'][0]['id']
+    data_set = Item.query.filter(Item.id.in_(items)).all()
+    return render_template('checkout.html', data=data_set)
 
 
 @app.route('/create', methods=['POST', 'GET'])

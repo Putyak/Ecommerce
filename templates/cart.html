@@ -15,6 +15,7 @@
 <div class="container">
    <div class="card-deck mb-3 text-center">
      {% if data|length > 0 %}
+
   {% for el in data %}
     <div class="card mb-4 shadow-sm">
       <div class="card-header">
@@ -25,24 +26,27 @@
         <ul class="list-unstyled mt-3 mb-4">
           <li>{{ el.description }}</li>
         </ul>
+          <a href="/out-cart/{{ el.id }}" class="stretched-link text-danger" style="position: relative;">Удалить</a>
       </div>
     </div>
-       {% endfor %}
 
-       <div><b>Оформить заказ</b><br>
-    <form action="/cart_order/" method="post">
-        <input type="text" class="form-control" name="name" id="name" placeholder="Имя"><br>
-        <input type="text" class="form-control" name="email" id="email" placeholder="Почта"><br>
-        <input type="text" class="form-control" name="description" id="description" placeholder="Указать примечание"><br>
-        <button class="btn btn-success" type="submit">Сформировать заказ</button>
+       {% endfor %}
+  </div>
+</div>
+
+    <form action="/checkout" method="get">
+        <div class="container"> <button class="btn btn-success" type="submit">Сформировать заказ</button> </div>
     </form>
-       </div>
+
      {% else %}
 
       <div class="col-6 col-md">
           <h5>Нет ни одного товара.</h5><a class="stretched-link" href="/">Продолжить покупки.</a>
       </div>
+  </div>
+</div>
      {% endif %}
 
-  </div>
+
 {% endblock %}
+
