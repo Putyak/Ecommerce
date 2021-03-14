@@ -165,13 +165,6 @@ def sign_in():
         return render_template('signin.html')
 
 
-@app.route('/email')
-def test_email():
-
-    
-    return render_template('email_order.html')
-
-
 @app.route('/checkout', methods=['POST', 'GET'])
 def checkout():
     if request.method == "POST":
