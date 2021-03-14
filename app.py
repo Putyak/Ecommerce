@@ -177,7 +177,7 @@ def checkout():
         for i in data_set:
             data.append(dict(title=i.title, price=i.price, description=i.description))
 
-        message = 'Name: ' + firstname + '\n' + 'Last name:' + lastname + '\n' + 'User name: ' + username + '\n' + 'Products: ' + str(data)
+        message = render_template('email_order.html', data=data_set, email=email)
         email_sender(email, message)
 
         return redirect('/pay_mock/')
@@ -242,6 +242,25 @@ def post_update(id):
 
     else:
         return render_template("posts_update.html", item=item)
+
+
+# @app.route('/email')
+# def email_send_order():
+#
+#     items = session['cart_item'][0]['id']
+#     data_set = Item.query.filter(Item.id.in_(items)).all()
+#
+#     data = []
+#     for i in data_set:
+#         data.append(dict(title=i.title, price=i.price, description=i.description))
+#
+#
+#     email = 'ilya.putyak@gmail.com'
+#     message = render_template('email_order.html', data=data_set)
+#
+#     email_sender(email, message)
+#     return render_template('email_order.html', data=data_set)
+
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
