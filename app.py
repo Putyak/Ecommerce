@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, Response
+from flask import Flask, render_template, request, redirect, session, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from bs4 import BeautifulSoup
@@ -30,13 +30,26 @@ db.create_all()
 
 @app.route('/')
 def index():
-    items = Item.query.order_by(Item.price).all()
-    return render_template('index.html', data=items)
+    try:
+        cart_counter = session['cart_item'][0]['id']
+        cart_counter = list(set(cart_counter))
+        print(cart_counter)
+        items = Item.query.order_by(Item.price).all()
+        return render_template('index.html', data=items, cart_counter=cart_counter)
+    except:
+        items = Item.query.order_by(Item.price).all()
+        return render_template('index.html', data=items)
 
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    try:
+        cart_counter = session['cart_item'][0]['id']
+        cart_counter = list(set(cart_counter))
+        items = Item.query.order_by(Item.price).all()
+        return render_template('index.html', data=items, cart_counter=cart_counter)
+    except:
+        return render_template('about.html')
 
 
 @app.route('/shop-list')
@@ -59,7 +72,8 @@ def add_product_to_cart(id):
     cart_item = [{'id': data}]
     session['cart_item'] = cart_item
 
-    return redirect('/cart')
+    return redirect('/')
+
 
 
 @app.route('/out-cart/<int:id>')
@@ -84,8 +98,9 @@ def cart():
 
     try:
         items = session['cart_item'][0]['id']
+        items = list(set(items))
         data_set = Item.query.filter(Item.id.in_(items)).all()
-        return render_template('cart.html', data=data_set)
+        return render_template('cart.html', data=data_set, cart_counter=items)
     except:
         return render_template('cart.html')
 

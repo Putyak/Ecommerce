@@ -25,7 +25,11 @@
         <ul class="list-unstyled mt-3 mb-4">
           <li>{{ el.description }}</li>
         </ul>
-        <a href="/to-cart/{{ el.id }}" class="btn btn-lg btn-outline-primary" style="height: 50px;">В корзину</a>
+        {% if el.id in cart_counter %}
+          <p>Товар в корзине</p>
+{% else %}
+            <a href="/to-cart/{{ el.id }}" class="btn btn-lg btn-outline-primary" style="height: 50px;">В корзину</a>
+{% endif %}
       </div>
     </div>
      <br>
