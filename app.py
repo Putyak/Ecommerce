@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, Response
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
 from bs4 import BeautifulSoup
 import requests
 from email_sender import email_sender
@@ -17,8 +18,14 @@ class Item(db.Model):
     title = db.Column(db.String(100), nullable=True)
     price = db.Column(db.Integer, nullable=True)
     description = db.Column(db.String(100), nullable=True)
+    img = db.Column(db.Text, nullable=True)
+    name = db.Column(db.Text, nullable=True)
+    mimetype = db.Column(db.Text, nullable=True)
 
     isActive = db.Column(db.Boolean, default=True)
+
+
+db.create_all()
 
 
 @app.route('/')
@@ -72,14 +79,6 @@ def product_leaves_cart(id):
         return redirect('/cart')
 
 
-@app.route('/test/')
-def test():
-    id = session['cart_item'][0]['id']
-    print(session['cart_item'][0]['id'])
-
-    return str(id)
-
-
 @app.route('/cart/')
 def cart():
 
@@ -89,6 +88,15 @@ def cart():
         return render_template('cart.html', data=data_set)
     except:
         return render_template('cart.html')
+
+
+@app.route('/img/<int:id>')
+def get_img(id):
+    img = Item.query.filter_by(id=id).first()
+    if not img:
+        return 'Img Not Found!', 404
+
+    return Response(img.img, mimetype=img.mimetype)
 
 
 @app.route('/pay_mock/', methods=['GET'])
@@ -195,8 +203,13 @@ def create():
         title = request.form['title']
         description = request.form['description']
         price = request.form['price']
+        pic = request.files['pic']
+        filename = secure_filename(pic.filename)
+        mimetype = pic.mimetype
+        if not filename or not mimetype:
+            return 'Bad upload!', 400
 
-        item = Item(title=title, price=price, description=description)
+        item = Item(title=title, price=price, description=description, img=pic.read(), name=filename, mimetype=mimetype)
 
         try:
             db.session.add(item)
@@ -266,4 +279,4 @@ def post_update(id):
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

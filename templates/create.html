@@ -9,10 +9,12 @@
 {% block body %}
 <div class="container">
     <h1>Про магазин</h1>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <input type="text" class="form-control" name="title" id="title" placeholder="title"><br>
         <input type="text" class="form-control" name="description" id="description" placeholder="description"><br>
         <input type="number" class="form-control" name="price" id="price" placeholder="price"><br>
+        <input type="file" name="pic" /><br>
+        <br>
         <button class="btn btn-success" type="submit">Добавить товар</button>
     </form>
 </div>
