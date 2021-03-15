@@ -13,13 +13,16 @@
     box-sizing: border-box;
     min-width: 18px;
     height: 18px;
-    padding: 0 4px;
+    padding: 0;
     text-align: center;
     color: #fff;
     border-radius: 18px;
     background-color: #00B848;
     border: 2px solid #fff;
     font-weight: 500;
+    position:absolute;
+    right: 170px;
+    top: 1.5%;
 
 </style>
 </head>
@@ -29,7 +32,7 @@
   <h5 class="my-0 mr-md-auto font-weight-normal">Shop</h5>
   <nav class="my-2 my-md-0 mr-md-3">
     <a class="p-2 text-dark" href="/">Главная</a>
-    <a class="p-2 text-dark" href="/cart">Корзина
+    <a class="p-2 text-dark" href="/cart">Корзина</a>
 
       {% if cart_counter|length < 1 %}
 
@@ -37,8 +40,6 @@
       <sup class="counter">{{cart_counter|length}}</sup>
       {% endif %}
 
-
-    </a>
     <a class="p-2 text-dark" href="/about">О нас</a>
   </nav>
   <a class="btn btn-outline-primary" href="/signin">Войти</a>
