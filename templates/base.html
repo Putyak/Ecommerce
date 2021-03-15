@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     {% block title %} {% endblock %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<style type="text/css">
+
+.counter {
+    font-size: 10px;
+    line-height: 14px;
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    text-align: center;
+    color: #fff;
+    border-radius: 18px;
+    background-color: #00B848;
+    border: 2px solid #fff;
+    font-weight: 500;
+
+</style>
 </head>
 <body>
 
@@ -16,7 +34,7 @@
       {% if cart_counter|length < 1 %}
 
       {% else %}
-          {{cart_counter|length}}
+      <sup class="counter">{{cart_counter|length}}</sup>
       {% endif %}
 
 

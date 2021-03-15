@@ -75,7 +75,6 @@ def add_product_to_cart(id):
     return redirect('/')
 
 
-
 @app.route('/out-cart/<int:id>')
 def product_leaves_cart(id):
 
