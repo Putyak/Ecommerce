@@ -1,10 +1,13 @@
+import datetime
+
 from flask import Flask, render_template, request, redirect, session, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-from bs4 import BeautifulSoup
-import requests
-from email_sender import email_sender
 import uuid
+from email_sender import email_sender
+import itertools
+import operator
+
 #from cloudipsp import Api, Checkout
 
 app = Flask(__name__)
@@ -25,20 +28,59 @@ class Item(db.Model):
     isActive = db.Column(db.Boolean, default=True)
 
 
+class Customer(db.Model):
+    __tablename__ = 'customers'
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String, nullable=False)
+    lastname = db.Column(db.String, nullable=True)
+    email = db.Column(db.String, nullable=False, unique=True)
+    password = db.Column(db.String, nullable=True)
+    auth3rt = db.Column(db.String, nullable=True)
+    cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class Purchase(db.Model):
+    __tablename__ = 'purchases'
+    id = db.Column(db.Integer, primary_key=True)
+    customer_email = db.Column(db.String, nullable=False)
+    purchase_id = db.Column(db.String, nullable=True)
+    good_id = db.Column(db.String, nullable=True)
+    price = db.Column(db.Integer, nullable=True)
+    count = db.Column(db.Integer, nullable=True)
+    cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
 db.create_all()
 
+# data = []
+# data.append(Customer(
+#         firstname="Ivan",
+#         lastname="Ivanov",
+#         email='test@test.com',
+#         password="strictly_secret"
+#     ))
+#
+# db.session.add_all(data)
+# db.session.commit()
 
 @app.route('/')
 def index():
+    items = Item.query.order_by(Item.price).all()
     try:
         cart_counter = session['cart_item'][0]['id']
         cart_counter = list(set(cart_counter))
-        print(cart_counter)
-        items = Item.query.order_by(Item.price).all()
-        return render_template('index.html', data=items, cart_counter=cart_counter)
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('index.html', data=items, cart_counter=cart_counter, auth_email=auth_email)
+        except:
+            return render_template('index.html', data=items, cart_counter=cart_counter)
+
     except:
-        items = Item.query.order_by(Item.price).all()
-        return render_template('index.html', data=items)
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('index.html', data=items, auth_email=auth_email)
+        except:
+            return render_template('index.html', data=items)
 
 
 @app.route('/about')
@@ -47,7 +89,7 @@ def about():
         cart_counter = session['cart_item'][0]['id']
         cart_counter = list(set(cart_counter))
         items = Item.query.order_by(Item.price).all()
-        return render_template('index.html', data=items, cart_counter=cart_counter)
+        return render_template('about.html', data=items, cart_counter=cart_counter)
     except:
         return render_template('about.html')
 
@@ -136,6 +178,10 @@ def delete_cart():
     session.pop('cart_item', None)
     return redirect('/')
 
+@app.route('/delete-auth/')
+def delete_auth():
+    session.pop('auth_email', None)
+    return redirect('/')
 
 # @app.route('/pay/<int:id>')
 # def item_pay(id):
@@ -166,15 +212,25 @@ def delete_cart():
 #     url = checkout.url(data).get('checkout_url')
 #     return redirect(url)
 
+
 @app.route('/signin', methods=['POST', 'GET'])
 def sign_in():
     if request.method == "POST":
         email = request.form['email']
         password = request.form['password']
-        if email == 'admin@test.com' and password == '123':
-            return redirect('/shop-list')
+        query_email = Customer.query.filter(Customer.email == email).all()
+
+        data = []
+        for i in query_email:
+            data.append(dict(email=i.email, password=i.password))
+
+        if data[0]["email"] == email and data[0]["password"] == password:
+            auth_email = [{'email': email}]
+            session['auth_email'] = auth_email
+
+            return redirect('/about')
         else:
-            return ('ты не авторизован -_-')
+            return "ты не авторизован"
     else:
         return render_template('signin.html')
 
@@ -201,6 +257,14 @@ def checkout():
 
         message = render_template('email_order.html', data=data_set, email=email)
         email_sender(email, message)
+
+
+        purchase_id = str(uuid.uuid4())
+
+        for i in data_set:
+            purchase = Purchase(customer_email=email, purchase_id=purchase_id, good_id=i.id, price=i.price, count=1)
+            db.session.add(purchase)
+            db.session.commit()
 
         return redirect('/pay_mock/')
 
@@ -287,6 +351,28 @@ def post_update(id):
 #
 #     email_sender(email, message)
 #     return render_template('email_order.html', data=data_set)
+
+@app.route('/orders')
+def get_orders():
+    try:
+        auth_email = session['auth_email'][0]['email']
+        query_oerder = Purchase.query.filter(Purchase.customer_email == auth_email).all()
+        orders=[]
+        for i in query_oerder:
+            orders.append(dict(purchase_id=i.purchase_id, good_id=i.good_id, price=i.price, count=i.count, cdate=i.cdate))
+
+        def groupid_purchase(d):
+            del d['purchase_id']
+            return d
+
+        data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in itertools.groupby(orders, operator.itemgetter('purchase_id'))]
+        print(data)
+
+        return jsonify(data)
+
+    except:
+        return 'ни чо нет'
+
 
 
 
