@@ -10,25 +10,25 @@
 # print("https://sandbox3.payture.com/apim/Pay?SessionId=" + tag['SessionId'])
 
 
-import itertools
-import operator
-INPUT=[
-  {'group_id' : 1, 'name' : 'aaa', 'age' : 111},
-  {'group_id' : 1, 'name' : 'bbb', 'age' : 222},
-  {'group_id' : 2, 'name' : 'ccc', 'age' : 333},
-  {'group_id' : 2, 'name' : 'ddd', 'age' : 444},
-  {'group_id' : 3, 'name' : 'eee', 'age' : 555},
-  {'group_id' : 3, 'name' : 'fff', 'age' : 666},
-]
-
-
-def groupid_drop(d):
-    del d['group_id']
-    return d
-
-
-RESULT=[{'group_id': i, 'data': list(map(groupid_drop, grp))} for i, grp in itertools.groupby(INPUT, operator.itemgetter('group_id'))]
-print(RESULT)
+# import itertools
+# import operator
+# INPUT=[
+#   {'group_id' : 1, 'name' : 'aaa', 'age' : 111},
+#   {'group_id' : 1, 'name' : 'bbb', 'age' : 222},
+#   {'group_id' : 2, 'name' : 'ccc', 'age' : 333},
+#   {'group_id' : 2, 'name' : 'ddd', 'age' : 444},
+#   {'group_id' : 3, 'name' : 'eee', 'age' : 555},
+#   {'group_id' : 3, 'name' : 'fff', 'age' : 666},
+# ]
+#
+#
+# def groupid_drop(d):
+#     del d['group_id']
+#     return d
+#
+#
+# RESULT=[{'group_id': i, 'data': list(map(groupid_drop, grp))} for i, grp in itertools.groupby(INPUT, operator.itemgetter('group_id'))]
+# print(RESULT)
 
 #
 # INPUT=[
@@ -69,5 +69,3 @@ print(RESULT)
 # RESULT=[{'purchase_id': i, 'data': map(groupid_drop, grp)} for i, grp in itertools.groupby(INPUT, operator.itemgetter('purchase_id'))]
 #
 # print(RESULT)
-
-

@@ -63,6 +63,7 @@ db.create_all()
 # db.session.add_all(data)
 # db.session.commit()
 
+
 @app.route('/')
 def index():
     items = Item.query.order_by(Item.price).all()
@@ -85,13 +86,22 @@ def index():
 
 @app.route('/about')
 def about():
+    items = Item.query.order_by(Item.price).all()
     try:
         cart_counter = session['cart_item'][0]['id']
         cart_counter = list(set(cart_counter))
-        items = Item.query.order_by(Item.price).all()
-        return render_template('about.html', data=items, cart_counter=cart_counter)
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('about.html', data=items, cart_counter=cart_counter, auth_email=auth_email)
+        except:
+            return render_template('about.html', data=items, cart_counter=cart_counter)
+
     except:
-        return render_template('about.html')
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('about.html', data=items, auth_email=auth_email)
+        except:
+            return render_template('about.html', data=items)
 
 
 @app.route('/shop-list')
@@ -141,9 +151,19 @@ def cart():
         items = session['cart_item'][0]['id']
         items = list(set(items))
         data_set = Item.query.filter(Item.id.in_(items)).all()
-        return render_template('cart.html', data=data_set, cart_counter=items)
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('cart.html', data=data_set, cart_counter=items, auth_email=auth_email)
+        except:
+            return render_template('cart.html', data=data_set, cart_counter=items)
+
+
     except:
-        return render_template('cart.html')
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('cart.html', auth_email=auth_email)
+        except:
+            return render_template('cart.html')
 
 
 @app.route('/img/<int:id>')
@@ -228,7 +248,7 @@ def sign_in():
             auth_email = [{'email': email}]
             session['auth_email'] = auth_email
 
-            return redirect('/about')
+            return redirect('/orders')
         else:
             return "ты не авторизован"
     else:
@@ -335,45 +355,58 @@ def post_update(id):
         return render_template("posts_update.html", item=item)
 
 
-# @app.route('/email')
-# def email_send_order():
-#
-#     items = session['cart_item'][0]['id']
-#     data_set = Item.query.filter(Item.id.in_(items)).all()
-#
-#     data = []
-#     for i in data_set:
-#         data.append(dict(title=i.title, price=i.price, description=i.description))
-#
-#
-#     email = 'ilya.putyak@gmail.com'
-#     message = render_template('email_order.html', data=data_set)
-#
-#     email_sender(email, message)
-#     return render_template('email_order.html', data=data_set)
-
 @app.route('/orders')
 def get_orders():
     try:
-        auth_email = session['auth_email'][0]['email']
-        query_oerder = Purchase.query.filter(Purchase.customer_email == auth_email).all()
-        orders=[]
-        for i in query_oerder:
-            orders.append(dict(purchase_id=i.purchase_id, good_id=i.good_id, price=i.price, count=i.count, cdate=i.cdate))
+        cart_counter = session['cart_item'][0]['id']
+        cart_counter = list(set(cart_counter))
+        try:
+            auth_email = session['auth_email'][0]['email']
+            query_order = Purchase.query.filter(Purchase.customer_email == auth_email).all()
+            orders=[]
+            for i in query_order:
+                orders.append(dict(purchase_id=i.purchase_id, good_id=i.good_id, price=i.price, count=i.count, cdate=i.cdate))
 
-        def groupid_purchase(d):
-            del d['purchase_id']
-            return d
+            def groupid_purchase(d):
+                del d['purchase_id']
+                return d
 
-        data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in itertools.groupby(orders, operator.itemgetter('purchase_id'))]
-        print(data)
+            data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in itertools.groupby(orders, operator.itemgetter('purchase_id'))]
+            print(data)
+            date = data[0]['data'][0]['cdate']
+            date = str(date)[:-10]
+            print(date)
 
-        return jsonify(data)
+            return render_template("orders.html", data=data, date=date, auth_email=auth_email, cart_counter=cart_counter)
+
+        except:
+            return render_template('orders.html', data=data, cart_counter=cart_counter)
+
 
     except:
-        return 'ни чо нет'
+        try:
+            auth_email = session['auth_email'][0]['email']
+            query_order = Purchase.query.filter(Purchase.customer_email == auth_email).all()
+            orders = []
+            for i in query_order:
+                orders.append(
+                    dict(purchase_id=i.purchase_id, good_id=i.good_id, price=i.price, count=i.count, cdate=i.cdate))
 
+            def groupid_purchase(d):
+                del d['purchase_id']
+                return d
 
+            data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in
+                    itertools.groupby(orders, operator.itemgetter('purchase_id'))]
+            print(data)
+            date = data[0]['data'][0]['cdate']
+            date = str(date)[:-10]
+            print(date)
+
+            return render_template("orders.html", data=data, date=date, auth_email=auth_email)
+        except:
+            memo = 'memo'
+            return render_template("orders.html", memo='memo')
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'

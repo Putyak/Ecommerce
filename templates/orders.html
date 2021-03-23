@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    <title>Landing Page</title>
+    <title>Landing Page | Orders</title>
 {% endblock %}
 
 
@@ -13,39 +13,40 @@
 </div>
 
 <div class="container">
-   <div class="card-deck mb-3 text-center">
-     {% if data|length > 0 %}
 
-  {% for el in data %}
-    <div class="card mb-4 shadow-sm">
-      <div class="card-header">
-        <h4 class="my-0 font-weight-normal">{{ el.title }}</h4>
-      </div>
-      <div class="card-body">
-        <div><img src="/img/{{ el.id }}" style="width: 100px; height: 100px; float:left;"></div>
-        <h1 class="card-title pricing-card-title">{{ el.price }}<small class="text-muted"> рублей</small></h1>
-        <ul class="list-unstyled mt-3 mb-4">
-          <li>{{ el.description }}</li>
-        </ul>
-      </div>
-    </div>
+{% if memo %}
 
+    Список заказов не доступен, так как вы не авторизовались.
+
+{% else %}
+
+
+    {% if data|length > 0 %}
+
+       {% for el in data %}
+       <br> Номер заказа: {{ el.purchase_id }} <br>
+       <br> Дата заказа: {{ date }} <br>
+       <br>  {% for i in el.data %}
+       Товар: {{ i.good_id }}<br>
+       Цена: {{ i.price }}<br>
+       Количество: {{ i.count }}<br>
+       <br>
        {% endfor %}
-  </div>
+    Итого: {{ el.data | sum(attribute='price') }} р.
+
+    <br>
+
+    <hr>
+
+  {% endfor %}
+
+    {% else %}
+    Список заказов пуст. Заказов еще не было.
+    {% endif %}
+
+{% endif %}
+
 </div>
-
-    <form action="/checkout" method="get">
-        <div class="container"> <button class="btn btn-success" type="submit">Сформировать заказ</button> </div>
-    </form>
-
-     {% else %}
-
-      <div class="col-6 col-md">
-          <h5>Нет ни одного товара.</h5><a class="stretched-link" href="/">Продолжить покупки.</a>
-      </div>
-  </div>
-</div>
-     {% endif %}
 
 
 {% endblock %}
