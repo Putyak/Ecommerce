@@ -19,13 +19,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="15701150-d7e3-4700-b646-3e33cd99dd32" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/app.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="15701150-d7e3-4700-b646-3e33cd99dd32" name="Default Changelist" comment="Order page improvement">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orders.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orders.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,6 +78,14 @@
       <option name="presentableId" value="Default" />
       <updated>1616488054878</updated>
     </task>
+    <task id="LOCAL-00001" summary="Order page improvement">
+      <created>1616513835430</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1616513835430</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -95,30 +100,38 @@
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Order page improvement" />
+    <option name="LAST_COMMIT_MESSAGE" value="Order page improvement" />
+  </component>
   <component name="WindowStateProjectService">
-    <state width="1419" height="159" key="GridCell.Tab.0.bottom" timestamp="1616511228999">
-      <screen x="0" y="23" width="1440" height="801" />
+    <state width="1419" height="225" key="GridCell.Tab.0.bottom" timestamp="1616601474968">
+      <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1419" height="159" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1616510897311" />
-    <state width="1419" height="159" key="GridCell.Tab.0.bottom/0.23.1440.801@0.23.1440.801" timestamp="1616511228999" />
-    <state width="1419" height="159" key="GridCell.Tab.0.center" timestamp="1616511228998">
-      <screen x="0" y="23" width="1440" height="801" />
+    <state width="1419" height="225" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1616601474968" />
+    <state width="1419" height="203" key="GridCell.Tab.0.bottom/0.23.1440.801@0.23.1440.801" timestamp="1616577836332" />
+    <state width="1419" height="225" key="GridCell.Tab.0.center" timestamp="1616601474967">
+      <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1419" height="159" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1616510897310" />
-    <state width="1419" height="159" key="GridCell.Tab.0.center/0.23.1440.801@0.23.1440.801" timestamp="1616511228998" />
-    <state width="1419" height="159" key="GridCell.Tab.0.left" timestamp="1616511228998">
-      <screen x="0" y="23" width="1440" height="801" />
+    <state width="1419" height="225" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1616601474967" />
+    <state width="1419" height="203" key="GridCell.Tab.0.center/0.23.1440.801@0.23.1440.801" timestamp="1616577836331" />
+    <state width="1419" height="225" key="GridCell.Tab.0.left" timestamp="1616601474966">
+      <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1419" height="159" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1616510897309" />
-    <state width="1419" height="159" key="GridCell.Tab.0.left/0.23.1440.801@0.23.1440.801" timestamp="1616511228998" />
-    <state width="1419" height="159" key="GridCell.Tab.0.right" timestamp="1616511228999">
-      <screen x="0" y="23" width="1440" height="801" />
+    <state width="1419" height="225" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1616601474966" />
+    <state width="1419" height="203" key="GridCell.Tab.0.left/0.23.1440.801@0.23.1440.801" timestamp="1616577836331" />
+    <state width="1419" height="225" key="GridCell.Tab.0.right" timestamp="1616601474967">
+      <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1419" height="159" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1616510897310" />
-    <state width="1419" height="159" key="GridCell.Tab.0.right/0.23.1440.801@0.23.1440.801" timestamp="1616511228999" />
+    <state width="1419" height="225" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1616601474967" />
+    <state width="1419" height="203" key="GridCell.Tab.0.right/0.23.1440.801@0.23.1440.801" timestamp="1616577836331" />
     <state x="498" y="159" key="RollbackChangesDialog" timestamp="1616511070523">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="498" y="159" key="RollbackChangesDialog/0.0.1440.900@0.0.1440.900" timestamp="1616511070523" />
+    <state x="320" y="190" key="Vcs.Push.Dialog.v2" timestamp="1616513849192">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="320" y="190" key="Vcs.Push.Dialog.v2/0.0.1440.900@0.0.1440.900" timestamp="1616513849192" />
   </component>
 </project>

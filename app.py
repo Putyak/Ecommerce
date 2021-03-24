@@ -72,6 +72,8 @@ def index():
         cart_counter = list(set(cart_counter))
         try:
             auth_email = session['auth_email'][0]['email']
+            a = session['cart_item']
+            print(a)
             return render_template('index.html', data=items, cart_counter=cart_counter, auth_email=auth_email)
         except:
             return render_template('index.html', data=items, cart_counter=cart_counter)
@@ -127,6 +129,25 @@ def add_product_to_cart(id):
     return redirect('/')
 
 
+@app.route('/to-cart-t/<int:id>')
+def add_product_to_cart_t(id):
+
+    data = []
+
+    try:
+        for i in session['cart_item']:
+            data.append({'id': i['id'], 'count': 1})
+            data.append({'id': id, 'count': 1})
+    except:
+        data.append({'id': id, 'count': 1})
+
+    cart_item = data
+    session['cart_item'] = cart_item
+    print(session)
+
+    return redirect('/')
+
+
 @app.route('/out-cart/<int:id>')
 def product_leaves_cart(id):
 
@@ -156,7 +177,6 @@ def cart():
             return render_template('cart.html', data=data_set, cart_counter=items, auth_email=auth_email)
         except:
             return render_template('cart.html', data=data_set, cart_counter=items)
-
 
     except:
         try:
@@ -197,6 +217,7 @@ def mock_result():
 def delete_cart():
     session.pop('cart_item', None)
     return redirect('/')
+
 
 @app.route('/delete-auth/')
 def delete_auth():
@@ -287,7 +308,6 @@ def checkout():
             db.session.commit()
 
         return redirect('/pay_mock/')
-
 
 
     items = session['cart_item'][0]['id']
