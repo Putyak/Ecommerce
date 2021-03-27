@@ -68,15 +68,17 @@ db.create_all()
 def index():
     items = Item.query.order_by(Item.price).all()
     try:
-        cart_counter = session['cart_item'][0]['id']
-        cart_counter = list(set(cart_counter))
+        cart_counter = []
+        for i in session['cart_item']:
+            cart_counter.append(dict(id=i['id'], count=i['count']))
+
+        button_visible = [i['id'] for i in session['cart_item']]
+
         try:
             auth_email = session['auth_email'][0]['email']
-            a = session['cart_item']
-            print(a)
-            return render_template('index.html', data=items, cart_counter=cart_counter, auth_email=auth_email)
+            return render_template('index.html', data=items, cart_counter=cart_counter, auth_email=auth_email, button_visible=button_visible)
         except:
-            return render_template('index.html', data=items, cart_counter=cart_counter)
+            return render_template('index.html', data=items, cart_counter=cart_counter, button_visible=button_visible)
 
     except:
         try:
@@ -90,13 +92,17 @@ def index():
 def about():
     items = Item.query.order_by(Item.price).all()
     try:
-        cart_counter = session['cart_item'][0]['id']
-        cart_counter = list(set(cart_counter))
+        cart_counter = []
+        for i in session['cart_item']:
+            cart_counter.append(dict(id=i['id'], count=i['count']))
+
+        button_visible = [i['id'] for i in session['cart_item']]
+
         try:
             auth_email = session['auth_email'][0]['email']
-            return render_template('about.html', data=items, cart_counter=cart_counter, auth_email=auth_email)
+            return render_template('about.html', data=items, cart_counter=cart_counter, auth_email=auth_email, button_visible=button_visible)
         except:
-            return render_template('about.html', data=items, cart_counter=cart_counter)
+            return render_template('about.html', data=items, cart_counter=cart_counter, button_visible=button_visible)
 
     except:
         try:
@@ -137,31 +143,50 @@ def add_product_to_cart_t(id):
     try:
         for i in session['cart_item']:
             data.append({'id': i['id'], 'count': 1})
-            data.append({'id': id, 'count': 1})
+
+        data.append({'id': id, 'count': 1})
     except:
         data.append({'id': id, 'count': 1})
 
     cart_item = data
     session['cart_item'] = cart_item
-    print(session)
+
 
     return redirect('/')
+
+
+@app.route('/add-count/<int:id>/<int:count>')
+def add_quantity(id, count):
+
+    data = session['cart_item']
+    for i in data:
+        if i['id'] == id:
+            i['count'] = count
+
+    session['cart_item'] = data
+
+    print(session['cart_item'])
+    return redirect('/cart')
 
 
 @app.route('/out-cart/<int:id>')
 def product_leaves_cart(id):
 
-    data = []
-    for i in session['cart_item'][0]['id']:
-        data.append(i)
-
-    data = list(set(data))
-    data.remove(id)
-    if len(data) < 1:
+    if len(session['cart_item']) == 1:
         return redirect('/delete-cart/')
     else:
-        cart_item = [{'id': data}]
-        session['cart_item'] = cart_item
+        data = []
+        for i in session['cart_item']:
+            if i['id'] == id:
+                pass
+            else:
+                data.append(i)
+
+        session['cart_item'] = data
+
+        #
+        # cart_item = [{'id': data}]
+        # session['cart_item'] = cart_item
         return redirect('/cart')
 
 
@@ -169,14 +194,18 @@ def product_leaves_cart(id):
 def cart():
 
     try:
-        items = session['cart_item'][0]['id']
-        items = list(set(items))
-        data_set = Item.query.filter(Item.id.in_(items)).all()
+        cart_counter = []
+        for i in session['cart_item']:
+            cart_counter.append(dict(id=i['id'], count=i['count']))
+
+        cart_item = [i['id'] for i in session['cart_item']]
+
+        data_set = Item.query.filter(Item.id.in_(cart_item)).all()
         try:
             auth_email = session['auth_email'][0]['email']
-            return render_template('cart.html', data=data_set, cart_counter=items, auth_email=auth_email)
+            return render_template('cart.html', data=data_set, cart_counter=cart_counter, auth_email=auth_email)
         except:
-            return render_template('cart.html', data=data_set, cart_counter=items)
+            return render_template('cart.html', data=data_set, cart_counter=cart_counter)
 
     except:
         try:
@@ -378,8 +407,9 @@ def post_update(id):
 @app.route('/orders')
 def get_orders():
     try:
-        cart_counter = session['cart_item'][0]['id']
-        cart_counter = list(set(cart_counter))
+        cart_counter = []
+        for i in session['cart_item']:
+            cart_counter.append(dict(id=i['id'], count=i['count']))
         try:
             auth_email = session['auth_email'][0]['email']
             query_order = Purchase.query.filter(Purchase.customer_email == auth_email).all()
@@ -392,16 +422,14 @@ def get_orders():
                 return d
 
             data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in itertools.groupby(orders, operator.itemgetter('purchase_id'))]
-            print(data)
+
             date = data[0]['data'][0]['cdate']
             date = str(date)[:-10]
-            print(date)
 
             return render_template("orders.html", data=data, date=date, auth_email=auth_email, cart_counter=cart_counter)
 
         except:
-            return render_template('orders.html', data=data, cart_counter=cart_counter)
-
+            return render_template('orders.html', cart_counter=cart_counter)
 
     except:
         try:
@@ -418,10 +446,9 @@ def get_orders():
 
             data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in
                     itertools.groupby(orders, operator.itemgetter('purchase_id'))]
-            print(data)
+
             date = data[0]['data'][0]['cdate']
             date = str(date)[:-10]
-            print(date)
 
             return render_template("orders.html", data=data, date=date, auth_email=auth_email)
         except:

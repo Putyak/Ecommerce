@@ -37,7 +37,7 @@
       {% if cart_counter|length < 1 %}
 
       {% else %}
-      <sup class="counter">{{cart_counter|length}}</sup>
+      <sup class="counter">{{cart_counter|sum(attribute='count')}}</sup>
       {% endif %}
 
     <a class="p-2 text-dark" href="/about">О нас</a>
