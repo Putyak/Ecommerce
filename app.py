@@ -1,19 +1,23 @@
 import datetime
-
-from flask import Flask, render_template, request, redirect, session, Response, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.utils import secure_filename
 import uuid
-from email_sender import email_sender
 import itertools
 import operator
 
-#from cloudipsp import Api, Checkout
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from flask import Flask, render_template, request, redirect, session, Response
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
+from email_sender import email_sender
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+admin = Admin(app)
 
 
 class Item(db.Model):
@@ -50,7 +54,12 @@ class Purchase(db.Model):
     cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
-db.create_all()
+admin.add_view(ModelView(Item, db.session))
+admin.add_view(ModelView(Customer, db.session))
+admin.add_view(ModelView(Purchase, db.session))
+
+
+# db.create_all()
 
 # data = []
 # data.append(Customer(
@@ -119,23 +128,6 @@ def test_payments():
 
 
 @app.route('/to-cart/<int:id>')
-def add_product_to_cart(id):
-
-    data = []
-    try:
-        for i in session['cart_item'][0]['id']:
-            data.append(i)
-            data.append(id)
-    except:
-        data.append(id)
-
-    cart_item = [{'id': data}]
-    session['cart_item'] = cart_item
-
-    return redirect('/')
-
-
-@app.route('/to-cart-t/<int:id>')
 def add_product_to_cart_t(id):
 
     data = []
@@ -151,7 +143,6 @@ def add_product_to_cart_t(id):
     cart_item = data
     session['cart_item'] = cart_item
 
-
     return redirect('/')
 
 
@@ -165,7 +156,6 @@ def add_quantity(id, count):
 
     session['cart_item'] = data
 
-    print(session['cart_item'])
     return redirect('/cart')
 
 
@@ -184,9 +174,6 @@ def product_leaves_cart(id):
 
         session['cart_item'] = data
 
-        #
-        # cart_item = [{'id': data}]
-        # session['cart_item'] = cart_item
         return redirect('/cart')
 
 
@@ -195,6 +182,7 @@ def cart():
 
     try:
         cart_counter = []
+
         for i in session['cart_item']:
             cart_counter.append(dict(id=i['id'], count=i['count']))
 
@@ -203,9 +191,33 @@ def cart():
         data_set = Item.query.filter(Item.id.in_(cart_item)).all()
         try:
             auth_email = session['auth_email'][0]['email']
-            return render_template('cart.html', data=data_set, cart_counter=cart_counter, auth_email=auth_email)
+            cart_product = []
+            for i in data_set:
+                cart_product.append(dict(id=i.id, price=i.price))
+
+            data = []
+            for i in cart_product:
+                for j in cart_counter:
+                    if i['id'] == j['id']:
+                        data.append(i['price'] * j['count'])
+            product_sum = sum(data)
+            product_sum_formated = '{0:,}'.format(int(product_sum)).replace(',', ' ')
+
+            return render_template('cart.html', data=data_set, cart_counter=cart_counter, auth_email=auth_email, product_sum_formated=product_sum_formated)
         except:
-            return render_template('cart.html', data=data_set, cart_counter=cart_counter)
+
+            cart_product = []
+            for i in data_set:
+                cart_product.append(dict(id=i.id, price=i.price))
+
+            data = []
+            for i in cart_product:
+                for j in cart_counter:
+                    if i['id'] == j['id']:
+                        data.append(i['price'] * j['count'])
+            product_sum = sum(data)
+            product_sum_formated = '{0:,}'.format(int(product_sum)).replace(',', ' ')
+            return render_template('cart.html', data=data_set, cart_counter=cart_counter, product_sum_formated=product_sum_formated)
 
     except:
         try:
@@ -253,54 +265,32 @@ def delete_auth():
     session.pop('auth_email', None)
     return redirect('/')
 
-# @app.route('/pay/<int:id>')
-# def item_pay(id):
-#     item = Item.query.get(id)
-#     title = str(item.title)
-#     amount = str(item.price)
-#     orderId = "https://sandbox3.payture.com/apim/Init?Key=Merchant&Data=SessionType%3DPay%3BOrderId%3D" + str(
-#         uuid.uuid4()) + "%3BProduct%3D" + title + "%3BTotal%3D" + amount + "%3BAmount%3D" + amount + "00"
-#     xml_string = requests.get(orderId)
-#     soup = BeautifulSoup(str(xml_string.text), 'xml')
-#     tag = soup.Init
-#     url = "https://sandbox3.payture.com/apim/Pay?SessionId=" + tag['SessionId']
-#
-#     return redirect(url)
-#
-#
-# @app.route('/buy/<int:id>')
-# def item_buy(id):
-#     item = Item.query.get(id)
-#
-#     api = Api(merchant_id=1396424,
-#               secret_key='test')
-#     checkout = Checkout(api=api)
-#     data = {
-#         "currency": "RUB",
-#         "amount": str(item.price) + "00"
-#     }
-#     url = checkout.url(data).get('checkout_url')
-#     return redirect(url)
-
 
 @app.route('/signin', methods=['POST', 'GET'])
 def sign_in():
     if request.method == "POST":
         email = request.form['email']
+        print(email)
         password = request.form['password']
+        print(password)
         query_email = Customer.query.filter(Customer.email == email).all()
 
         data = []
         for i in query_email:
             data.append(dict(email=i.email, password=i.password))
+        if data:
 
-        if data[0]["email"] == email and data[0]["password"] == password:
-            auth_email = [{'email': email}]
-            session['auth_email'] = auth_email
+            if data[0]["email"] == email and data[0]["password"] == password:
+                auth_email = [{'email': email}]
+                session['auth_email'] = auth_email
 
-            return redirect('/orders')
+                return redirect('/orders')
+
+            else:
+                return "ты не авторизован"
         else:
-            return "ты не авторизован"
+            return "остынь парниш :) таких нет..."
+
     else:
         return render_template('signin.html')
 
@@ -452,7 +442,6 @@ def get_orders():
 
             return render_template("orders.html", data=data, date=date, auth_email=auth_email)
         except:
-            memo = 'memo'
             return render_template("orders.html", memo='memo')
 
 

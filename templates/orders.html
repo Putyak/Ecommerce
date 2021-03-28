@@ -27,11 +27,18 @@
        <br> Номер заказа: {{ el.purchase_id }} <br>
        <br> Дата заказа: {{ date }} <br>
        <br>  {% for i in el.data %}
-       Товар: {{ i.good_id }}<br>
-       Цена: {{ i.price }}<br>
-       Количество: {{ i.count }}<br>
-       <br>
-       {% endfor %}
+    <div style="display: block; overflow: hidden; margin: 0 auto;">
+        <div style="float: left; width: 75px">
+            <img src="/img/{{ i.good_id }}" style="width: 55px; height: 55px;">
+        </div>
+        <div>
+            Товар: {{ i.good_id }}<br>
+            Цена: {{ i.price }}<br>
+            Количество: {{ i.count }}<br>
+            <br>
+        </div>
+    </div>
+    {% endfor %}
     Итого: {{ el.data | sum(attribute='price') }} р.
 
     <br>

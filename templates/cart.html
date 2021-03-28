@@ -27,26 +27,59 @@
         <ul class="list-unstyled mt-3 mb-4">
           <li>{{ el.description }}</li>
         </ul>
-          <a href="/out-cart/{{ el.id }}" class="stretched-link text-danger" style="position: relative;">Удалить</a>
+          <div style="display: block; overflow: hidden; margin: 0 auto;">
+              <div style="float: left; width: 100px">
+                  <a href="/out-cart/{{ el.id }}" class="text-danger"
+                     style="width: 100px">Удалить</a>
+              </div>
+              <div style="float: right;">
+                  <label for="product_count" style="float: left; margin-right: 5px;">Кол-во: </label>
+                  <select style="width: 45px;" name="product_count" id="product_count" onChange="window.location.href=this.value">
+                      <option selected>
+                          {% for i in cart_counter %}
+                          {% if el.id == i.id %}
+                          {{ i.count }}
+                          {% endif %}
+                          {% endfor %}
+                      </option>
+                      <option value="/add-count/{{ el.id }}/1">1</option>
+                      <option value="/add-count/{{ el.id }}/2">2</option>
+                      <option value="/add-count/{{ el.id }}/3">3</option>
+                      <option value="/add-count/{{ el.id }}/4">4</option>
+                      <option value="/add-count/{{ el.id }}/5">5</option>
+                      <option value="/add-count/{{ el.id }}/6">6</option>
+                      <option value="/add-count/{{ el.id }}/7">7</option>
+                      <option value="/add-count/{{ el.id }}/8">8</option>
+                      <option value="/add-count/{{ el.id }}/9">9</option>
+                      <option value="/add-count/{{ el.id }}/10">10</option>
+                  </select>
+              </div>
+          </div>
+
       </div>
     </div>
 
        {% endfor %}
-  </div>
+
+   </div>
+    <p>
+    <h3 type="tel" pattern="2-[0-9]{3}-[0-9]{3}">Итого: {{ product_sum_formated }}</h3></p>
 </div>
 
-    <form action="/checkout" method="get">
-        <div class="container"> <button class="btn btn-success" type="submit">Сформировать заказ</button> </div>
-    </form>
+<form action="/checkout" method="get">
+    <div class="container">
+        <button class="btn btn-success" type="submit">Сформировать заказ</button>
+    </div>
+</form>
 
-     {% else %}
+{% else %}
 
-      <div class="col-6 col-md">
-          <h5>Нет ни одного товара.</h5><a class="stretched-link" href="/">Продолжить покупки.</a>
-      </div>
-  </div>
+<div class="col-6 col-md">
+    <h5>Нет ни одного товара.</h5><a class="stretched-link" href="/">Продолжить покупки.</a>
 </div>
-     {% endif %}
+</div>
+</div>
+{% endif %}
 
 
 {% endblock %}
