@@ -3,8 +3,8 @@ import uuid
 import itertools
 import operator
 
-from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+# from flask_admin import Admin
+# from flask_admin.contrib.sqla import ModelView
 from flask import Flask, render_template, request, redirect, session, Response
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
