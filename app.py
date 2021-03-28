@@ -3,8 +3,8 @@ import uuid
 import itertools
 import operator
 
-# from flask_admin import Admin
-# from flask_admin.contrib.sqla import ModelView
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 from flask import Flask, render_template, request, redirect, session, Response
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# admin = Admin(app)
+admin = Admin(app)
 
 
 class Item(db.Model):
@@ -54,9 +54,9 @@ class Purchase(db.Model):
     cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
-# admin.add_view(ModelView(Item, db.session))
-# admin.add_view(ModelView(Customer, db.session))
-# admin.add_view(ModelView(Purchase, db.session))
+admin.add_view(ModelView(Item, db.session))
+admin.add_view(ModelView(Customer, db.session))
+admin.add_view(ModelView(Purchase, db.session))
 
 
 # db.create_all()
