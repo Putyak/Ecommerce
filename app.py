@@ -308,15 +308,15 @@ def checkout():
         address = request.form['address']
         address2 = request.form['address2']
 
-        items = session['cart_item'][0]['id']
+        items = [i['id'] for i in session['cart_item']]
         data_set = Item.query.filter(Item.id.in_(items)).all()
 
         data = []
         for i in data_set:
             data.append(dict(title=i.title, price=i.price, description=i.description))
 
-        message = render_template('email_order.html', data=data_set, email=email)
-        email_sender(email, message)
+        #message = render_template('email_order.html', data=data_set, email=email)
+        #email_sender(email, message)
 
 
         purchase_id = str(uuid.uuid4())
@@ -328,10 +328,26 @@ def checkout():
 
         return redirect('/pay_mock/')
 
+    cart_counter = []
+    for i in session['cart_item']:
+        cart_counter.append(dict(id=i['id'], count=i['count']))
 
-    items = session['cart_item'][0]['id']
+    items = [i['id'] for i in session['cart_item']]
     data_set = Item.query.filter(Item.id.in_(items)).all()
-    return render_template('checkout.html', data=data_set)
+
+    cart_product = []
+    for i in data_set:
+        cart_product.append(dict(id=i.id, price=i.price))
+
+    data = []
+    for i in cart_product:
+        for j in cart_counter:
+            if i['id'] == j['id']:
+                data.append(i['price'] * j['count'])
+    product_sum = sum(data)
+    product_sum_formated = '{0:,}'.format(int(product_sum)).replace(',', ' ')
+
+    return render_template('checkout.html', data=data_set, cart_counter=cart_counter, product_sum_formated=product_sum_formated)
 
 
 @app.route('/create', methods=['POST', 'GET'])
