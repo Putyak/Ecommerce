@@ -29,10 +29,11 @@
        <br>  {% for i in el.data %}
     <div style="display: block; overflow: hidden; margin: 0 auto;">
         <div style="float: left; width: 75px">
-            <img src="/img/{{ i.good_id }}" style="width: 55px; height: 55px;">
+            <img src="/img/{{ i.product_id }}" style="width: 55px; height: 55px;">
         </div>
         <div>
-            Товар: {{ i.good_id }}<br>
+            Товар: {{ i.product_name }}<br>
+            Описание: {{ i.product_description }}<br>
             Цена: {{ i.price }}<br>
             Количество: {{ i.count }}<br>
             <br>

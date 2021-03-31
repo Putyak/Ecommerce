@@ -40,6 +40,7 @@ class Customer(db.Model):
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=True)
     auth3rt = db.Column(db.String, nullable=True)
+    role = db.Column(db.String, nullable=True)
     cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
@@ -48,7 +49,9 @@ class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_email = db.Column(db.String, nullable=False)
     purchase_id = db.Column(db.String, nullable=True)
-    good_id = db.Column(db.String, nullable=True)
+    product_id = db.Column(db.String, nullable=True)
+    product_name = db.Column(db.String, nullable=True)
+    product_description = db.Column(db.String, nullable=True)
     price = db.Column(db.Integer, nullable=True)
     count = db.Column(db.Integer, nullable=True)
     cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
@@ -60,13 +63,13 @@ class Purchase(db.Model):
 
 
 # db.create_all()
-
+#
 # data = []
 # data.append(Customer(
 #         firstname="Ivan",
 #         lastname="Ivanov",
 #         email='test@test.com',
-#         password="strictly_secret"
+#         password="test123"
 #     ))
 #
 # db.session.add_all(data)
@@ -322,7 +325,7 @@ def checkout():
         purchase_id = str(uuid.uuid4())
 
         for i in data_set:
-            purchase = Purchase(customer_email=email, purchase_id=purchase_id, good_id=i.id, price=i.price, count=1)
+            purchase = Purchase(customer_email=email, purchase_id=purchase_id, product_id=i.id, product_name=i.title, product_description=i.description, price=i.price, count=1)
             db.session.add(purchase)
             db.session.commit()
 
@@ -421,7 +424,7 @@ def get_orders():
             query_order = Purchase.query.filter(Purchase.customer_email == auth_email).all()
             orders=[]
             for i in query_order:
-                orders.append(dict(purchase_id=i.purchase_id, good_id=i.good_id, price=i.price, count=i.count, cdate=i.cdate))
+                orders.append(dict(purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name, product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
 
             def groupid_purchase(d):
                 del d['purchase_id']
@@ -444,7 +447,7 @@ def get_orders():
             orders = []
             for i in query_order:
                 orders.append(
-                    dict(purchase_id=i.purchase_id, good_id=i.good_id, price=i.price, count=i.count, cdate=i.cdate))
+                    dict(purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name, product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
 
             def groupid_purchase(d):
                 del d['purchase_id']
