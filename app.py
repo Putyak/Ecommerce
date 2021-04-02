@@ -300,6 +300,11 @@ def sign_in():
 
 @app.route('/checkout', methods=['POST', 'GET'])
 def checkout():
+    cart_counter = []
+    for i in session['cart_item']:
+        cart_counter.append(dict(id=i['id'], count=i['count']))
+
+
     if request.method == "POST":
         firstname = request.form['lastname']
         lastname = request.form['lastname']
@@ -316,24 +321,26 @@ def checkout():
 
         data = []
         for i in data_set:
-            data.append(dict(title=i.title, price=i.price, description=i.description))
+            data.append(dict(id=i.id, title=i.title, price=i.price, description=i.description))
 
         #message = render_template('email_order.html', data=data_set, email=email)
         #email_sender(email, message)
 
-
         purchase_id = str(uuid.uuid4())
 
-        for i in data_set:
-            purchase = Purchase(customer_email=email, purchase_id=purchase_id, product_id=i.id, product_name=i.title, product_description=i.description, price=i.price, count=1)
+        purchase = []
+
+        for i in data:
+            for j in cart_counter:
+                if i['id'] == j['id']:
+                    purchase.append(dict(customer_email=email, purchase_id=purchase_id, product_id=i['id'], product_name=i['title'], product_description=i['description'], price=i['price'], count=j['count']))
+
+        for i in purchase:
+            purchase = Purchase(customer_email=email, purchase_id=purchase_id, product_id=i['product_id'], product_name=i['product_name'], product_description=i['product_description'], price=i['price'], count=i['count'])
             db.session.add(purchase)
             db.session.commit()
 
         return redirect('/pay_mock/')
-
-    cart_counter = []
-    for i in session['cart_item']:
-        cart_counter.append(dict(id=i['id'], count=i['count']))
 
     items = [i['id'] for i in session['cart_item']]
     data_set = Item.query.filter(Item.id.in_(items)).all()
