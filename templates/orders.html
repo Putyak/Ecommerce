@@ -25,7 +25,7 @@
 
        {% for el in data %}
        <br> Номер заказа: {{ el.purchase_id }} <br>
-       <br> Дата заказа: {{ date }} <br>
+       <br> Дата заказа:  {% for d in date %} {% if el.purchase_id == d.purchase_id %} {{ d.cdate }} {% endif %} {% endfor %}<br>
        <br>  {% for i in el.data %}
     <div style="display: block; overflow: hidden; margin: 0 auto;">
         <div style="float: left; width: 75px">

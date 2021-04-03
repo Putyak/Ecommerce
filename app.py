@@ -298,6 +298,26 @@ def sign_in():
         return render_template('signin.html')
 
 
+@app.route('/signin_link/<string:email>/<string:password>', methods=['GET'])
+def sign_in_link(email, password):
+    query_email = Customer.query.filter(Customer.email == email).all()
+
+    data = []
+    for i in query_email:
+        data.append(dict(email=i.email, password=i.password))
+        if data:
+
+            if data[0]["email"] == email and data[0]["password"] == password:
+                auth_email = [{'email': email}]
+                session['auth_email'] = auth_email
+                return redirect('/orders')
+            else:
+                return "ты не авторизован"
+        else:
+            return "остынь парниш :) таких нет..."
+
+
+
 @app.route('/checkout', methods=['POST', 'GET'])
 def checkout():
     cart_counter = []
@@ -461,8 +481,13 @@ def get_orders():
 
             data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in itertools.groupby(orders, operator.itemgetter('purchase_id'))]
 
-            date = data[0]['data'][0]['cdate']
-            date = str(date)[:-10]
+            cdate = []
+            for p_time in data:
+                date = []
+                for data_time in p_time['data']:
+                    datat_t = str(data_time['cdate'])
+                    date.append(datat_t[:-10])
+                cdate.append(dict(purchase_id=p_time['purchase_id'], cdate=date[0]))
 
             p_total = []
             for purchase in data:
@@ -473,7 +498,7 @@ def get_orders():
                 s_total = sum(p_total_sum)
                 p_total.append(dict(purchase_id=purchase['purchase_id'], total=s_total))
 
-            return render_template("orders.html", data=data, date=date, auth_email=auth_email, cart_counter=cart_counter, total=p_total)
+            return render_template("orders.html", data=data, date=cdate, auth_email=auth_email, cart_counter=cart_counter, total=p_total)
 
         except:
             return render_template('orders.html', cart_counter=cart_counter)
@@ -494,8 +519,13 @@ def get_orders():
             data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in
                     itertools.groupby(orders, operator.itemgetter('purchase_id'))]
 
-            date = data[0]['data'][0]['cdate']
-            date = str(date)[:-10]
+            cdate=[]
+            for p_time in data:
+                date = []
+                for data_time in p_time['data']:
+                    datat_t = str(data_time['cdate'])
+                    date.append(datat_t[:-10])
+                cdate.append(dict(purchase_id=p_time['purchase_id'], cdate=date[0]))
 
             p_total = []
             for purchase in data:
@@ -506,7 +536,7 @@ def get_orders():
                 s_total = sum(p_total_sum)
                 p_total.append(dict(purchase_id=purchase['purchase_id'], total=s_total))
 
-            return render_template("orders.html", data=data, date=date, auth_email=auth_email, total=p_total)
+            return render_template("orders.html", data=data, date=cdate, auth_email=auth_email, total=p_total)
         except:
             return render_template("orders.html", memo='memo')
 
