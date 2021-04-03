@@ -22,4 +22,4 @@ def email_sender(email_to, message):
     server.quit()  # Выходим
 
 
-# email_sender('ilya.putyak@gmail.com', 'test')
+#email_sender('ilya.putyak@gmail.com', 'test')

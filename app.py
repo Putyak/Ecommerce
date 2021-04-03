@@ -323,22 +323,43 @@ def checkout():
         for i in data_set:
             data.append(dict(id=i.id, title=i.title, price=i.price, description=i.description))
 
-        #message = render_template('email_order.html', data=data_set, email=email)
-        #email_sender(email, message)
-
         purchase_id = str(uuid.uuid4())
 
         purchase = []
-
         for i in data:
             for j in cart_counter:
                 if i['id'] == j['id']:
                     purchase.append(dict(customer_email=email, purchase_id=purchase_id, product_id=i['id'], product_name=i['title'], product_description=i['description'], price=i['price'], count=j['count']))
 
+        email_order = []
         for i in purchase:
+            email_order.append(dict(customer_email=email, purchase_id=purchase_id, product_id=i['product_id'], product_name=i['product_name'], product_description=i['product_description'], price=i['price'], count=i['count']))
             purchase = Purchase(customer_email=email, purchase_id=purchase_id, product_id=i['product_id'], product_name=i['product_name'], product_description=i['product_description'], price=i['price'], count=i['count'])
             db.session.add(purchase)
             db.session.commit()
+
+        cart_product = []
+        for i in data_set:
+            cart_product.append(dict(id=i.id, price=i.price))
+
+        data_sum = []
+        for i in cart_product:
+            for j in cart_counter:
+                if i['id'] == j['id']:
+                    data_sum.append(i['price'] * j['count'])
+        product_sum = sum(data_sum)
+        product_sum_formated = '{0:,}'.format(int(product_sum)).replace(',', ' ')
+
+        customer = Customer(firstname='customer', email=email, password='0123')
+
+        try:
+            db.session.add(customer)
+            db.session.commit()
+        except:
+            pass
+
+        message = render_template('email_order.html', data=email_order, total=product_sum_formated, email=email)
+        email_sender(email, message)
 
         return redirect('/pay_mock/')
 
@@ -349,12 +370,12 @@ def checkout():
     for i in data_set:
         cart_product.append(dict(id=i.id, price=i.price))
 
-    data = []
+    data_sum = []
     for i in cart_product:
         for j in cart_counter:
             if i['id'] == j['id']:
-                data.append(i['price'] * j['count'])
-    product_sum = sum(data)
+                data_sum.append(i['price'] * j['count'])
+    product_sum = sum(data_sum)
     product_sum_formated = '{0:,}'.format(int(product_sum)).replace(',', ' ')
 
     return render_template('checkout.html', data=data_set, cart_counter=cart_counter, product_sum_formated=product_sum_formated)
@@ -429,7 +450,8 @@ def get_orders():
         try:
             auth_email = session['auth_email'][0]['email']
             query_order = Purchase.query.filter(Purchase.customer_email == auth_email).all()
-            orders=[]
+
+            orders = []
             for i in query_order:
                 orders.append(dict(purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name, product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
 
@@ -442,7 +464,16 @@ def get_orders():
             date = data[0]['data'][0]['cdate']
             date = str(date)[:-10]
 
-            return render_template("orders.html", data=data, date=date, auth_email=auth_email, cart_counter=cart_counter)
+            p_total = []
+            for purchase in data:
+                p_total_sum = []
+                for p_summ in purchase['data']:
+                    p_total_sum.append(p_summ['price'] * p_summ['count'])
+
+                s_total = sum(p_total_sum)
+                p_total.append(dict(purchase_id=purchase['purchase_id'], total=s_total))
+
+            return render_template("orders.html", data=data, date=date, auth_email=auth_email, cart_counter=cart_counter, total=p_total)
 
         except:
             return render_template('orders.html', cart_counter=cart_counter)
@@ -466,7 +497,16 @@ def get_orders():
             date = data[0]['data'][0]['cdate']
             date = str(date)[:-10]
 
-            return render_template("orders.html", data=data, date=date, auth_email=auth_email)
+            p_total = []
+            for purchase in data:
+                p_total_sum = []
+                for p_summ in purchase['data']:
+                    p_total_sum.append(p_summ['price'] * p_summ['count'])
+
+                s_total = sum(p_total_sum)
+                p_total.append(dict(purchase_id=purchase['purchase_id'], total=s_total))
+
+            return render_template("orders.html", data=data, date=date, auth_email=auth_email, total=p_total)
         except:
             return render_template("orders.html", memo='memo')
 

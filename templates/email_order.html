@@ -150,7 +150,7 @@
 																			</tr>
 																			<tr>
 																				<td style="padding-bottom:8px;font-size:16px;line-height:20px;font-family:Helvetica,Arial,sans-serif;color:#878787;text-align:left">
-																					1 шт.
+																					{{ el.count }} шт.
 																				</td>
 																			</tr>
 																		   </tbody>
@@ -191,10 +191,10 @@
 													<table width="100%" cellspacing="0" cellpadding="0" border="0">
 														<tbody><tr>
 															<td style="padding:0 5px 4px 0;font-size:16px;line-height:24px;font-family:Helvetica,Arial,sans-serif;color:#212121;text-align:left">
-																Товары ({{data|length}})
+																Товары ({{ data | sum(attribute='count') }})
 															</td>
 															<td style="padding-bottom:4px;white-space:nowrap;font-size:16px;line-height:24px;font-family:Helvetica,Arial,sans-serif;color:#212121;text-align:right">
-																<strong>{{ data | sum(attribute='price') }} р.</strong>
+																<strong>{{ total }} р.</strong>
 															</td>
 														</tr>
 
@@ -213,7 +213,7 @@
 																<strong>Оплачено</strong>
 															</td>
 															<td style="padding-top:20px;white-space:nowrap;font-size:20px;line-height:28px;font-weight:bold;font-family:Helvetica,Arial,sans-serif;color:#212121;text-align:right">
-																<strong>{{ data | sum(attribute='price') }} р.</strong>
+																<strong>{{ total }} р.</strong>
 															</td>
 														</tr>
 													</tbody></table>

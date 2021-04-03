@@ -40,7 +40,7 @@
         </div>
     </div>
     {% endfor %}
-    Итого: {{ el.data | sum(attribute='price') }} р.
+    Итого: {% for t in total %} {% if el.purchase_id == t.purchase_id %} {{ t.total }} {% endif %} {% endfor %} р.
 
     <br>
 
