@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.82.0">
+    <title>Dashboard Template · Bootstrap v5.0</title>
+</head>
+<body>
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+  <h1 class="display-4">Заказы</h1>
+  <p class="lead">Список заказов</p>
+</div>
+
+<div class="container">
+
+       {% for el in data %}
+       <br> Номер заказа: {{ el.purchase_id }} <br>
+       <br> Дата заказа:  {% for d in date %} {% if el.purchase_id == d.purchase_id %} {{ d.cdate }} {% endif %} {% endfor %}<br>
+       <br>  {% for i in el.data %}
+    <div style="display: block; overflow: hidden; margin: 0 auto;">
+        <div style="float: left; width: 75px">
+            <img src="/img/{{ i.product_id }}" style="width: 55px; height: 55px;">
+        </div>
+        <div>
+            Товар: {{ i.product_name }}<br>
+            Описание: {{ i.product_description }}<br>
+            Цена: {{ i.price }}<br>
+            Количество: {{ i.count }}<br>
+            <br>
+        </div>
+    </div>
+    {% endfor %}
+
+
+    <br>
+Итого: {% for t in total %} {% if el.purchase_id == t.purchase_id %} {{ t.total }} {% endif %} {% endfor %} р.
+    <hr>
+{% endfor %}
+</div>
+
+
+
+</body>
+</html>
