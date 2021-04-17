@@ -1,39 +1,81 @@
-
 {% extends 'base.html' %}
 
 {% block title %}
-    <title>Landing Page</title>
+<title>Landing Page</title>
 {% endblock %}
 
 
 {% block body %}
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-  <h1 class="display-4">Products</h1>
-  <p class="lead">Easy way to make a right decision and get the order.</p>
+    <h1 class="display-4">Products</h1>
+    <p class="lead">Easy way to make a right decision and get the order.</p>
 </div>
 
 <div class="container">
-   <div class="card-deck mb-3 text-center">
-  {% for el in data %}
-    <div class="card mb-4 shadow-sm">
-      <div class="card-header">
-        <h4 class="my-0 font-weight-normal">{{ el.title }}</h4>
-      </div>
-      <div class="card-body">
-        <div><img src="/img/{{ el.id }}" style="width: 100px; height: 100px; float:left;"></div>
-        <h1 class="card-title pricing-card-title">{{ el.price }}<small class="text-muted"> USD</small></h1>
-        <ul class="list-unstyled mt-3 mb-4">
-          <li>{{ el.description }}</li>
-        </ul>
-        {% if el.id in button_visible %}
-          <p>Product added to cart</p>
-{% else %}
-            <a href="/to-cart/{{ el.id }}" class="btn btn-lg btn-outline-primary" style="height: 50px;">Add to cart</a>
-{% endif %}
-      </div>
-    </div>
-     <br>
+    <div class="card-deck mb-3 text-center">
+        {% for el in data %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <a href="#"><h4 class="my-0 font-weight-normal" data-toggle="modal" data-target="#{{ el.id }}">{{ el.title }}</h4></a>
 
-       {% endfor %}
-  </div>
-{% endblock %}
+            </div>
+            <div class="card-body">
+                <div><img src="/img/{{ el.id }}" style="width: 100px; height: 100px; float:left;"></div>
+                <h1 class="card-title pricing-card-title">{{ el.price }}
+                    <small class="text-muted"> USD</small>
+                </h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li>{{ el.description }}</li>
+                </ul>
+                {% if el.id in button_visible %}
+                <p>Product added to cart</p>
+                {% else %}
+                <a href="/to-cart/{{ el.id }}" class="btn btn-lg btn-outline-primary" style="height: 50px;">Add to
+                    cart</a>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+
+            <!-- Modal -->
+    <div class="modal fade bd-example-modal-lg" id="{{ el.id }}" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-lg"
+                 style="width:100%; height:100%; background: white; padding: 20px;">
+                <!-- <div class="modal-header">
+                     <h5 class="modal-title" id="exampleModalLabel">Product details</h5>
+                 </div>-->
+                <div class="modal-content"
+                     style="width:100%; height:100%; background: white; border:0px">
+                    <h1>{{ el.title }}</h1>
+                    <div class="card-body">
+                        <div>
+                            <img src="/img/{{ el.id }}" style="width: 100px; height: 100px; float:left;">
+                        </div>
+                        <h1 class="card-title pricing-card-title">{{ el.price }}
+                            <small class="text-muted"> USD</small>
+                        </h1>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            <li>{{ el.description }}</li>
+                        </ul>
+                        {% if el.id in button_visible %}
+                <p>Product added to cart</p>
+                {% else %}
+                <a href="/to-cart/{{ el.id }}" class="btn btn-lg btn-outline-primary" style="height: 50px;">Add to
+                    cart</a>
+                {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end -->
+
+        {% endfor %}
+    </div>
+    {% endblock %}
+
+

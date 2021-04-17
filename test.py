@@ -69,3 +69,4 @@
 # RESULT=[{'purchase_id': i, 'data': map(groupid_drop, grp)} for i, grp in itertools.groupby(INPUT, operator.itemgetter('purchase_id'))]
 #
 # print(RESULT)
+

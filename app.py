@@ -269,21 +269,30 @@ def delete_auth():
     return redirect('/')
 
 
+@app.route('/delete-admin-auth/')
+def delete_admin_auth():
+    session.pop('auth_admin', None)
+    return redirect('/')
+
 @app.route('/signin', methods=['POST', 'GET'])
 def sign_in():
     if request.method == "POST":
         email = request.form['email']
-        print(email)
         password = request.form['password']
-        print(password)
         query_email = Customer.query.filter(Customer.email == email).all()
 
         data = []
         for i in query_email:
-            data.append(dict(email=i.email, password=i.password))
+            data.append(dict(email=i.email, password=i.password, role=i.role))
         if data:
 
-            if data[0]["email"] == email and data[0]["password"] == password:
+            if data[0]["email"] == email and data[0]["password"] == password and data[0]["role"] == "admin":
+                auth_admin = [{'email': email}]
+                session['auth_admin'] = auth_admin
+
+                return redirect('/admin/dashboard')
+
+            elif data[0]["email"] == email and data[0]["password"] == password:
                 auth_email = [{'email': email}]
                 session['auth_email'] = auth_email
 
@@ -379,7 +388,7 @@ def checkout():
             pass
 
         message = render_template('email_order.html', data=email_order, total=product_sum_formated, email=email)
-        email_sender(email, message)
+        #email_sender(email, message)
 
         return redirect('/pay_mock/')
 
@@ -543,115 +552,141 @@ def get_orders():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    return render_template('admin_dashboard.html')
+
+    try:
+        session['auth_admin']
+        return render_template('admin_dashboard.html')
+
+    except:
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/orders')
 def admin_orders():
-    query_orders = Purchase.query.all()
-    orders = []
-    for i in query_orders:
-        orders.append(dict(id=i.id, customer_email=i.customer_email, purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name,
-                           product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
+    try:
+        session['auth_admin']
+        query_orders = Purchase.query.all()
+        orders = []
+        for i in query_orders:
+            orders.append(dict(id=i.id, customer_email=i.customer_email, purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name,
+                               product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
 
-    sample_query = db.session.query(Purchase.purchase_id).distinct().all()
-    unique_purchase_id = [i[0] for i in sample_query]
+        sample_query = db.session.query(Purchase.purchase_id).distinct().all()
+        unique_purchase_id = [i[0] for i in sample_query]
 
-    order_data = []
-    for j in orders:
-        for f in unique_purchase_id:
-            print (f)
-            if f == j['purchase_id']:
-                order_data.append(dict(purchase_id=j['purchase_id'], customer_email=j['customer_email'], cdate=j['cdate']))
-            else:
-                pass
+        order_data = []
+        for j in orders:
+            for f in unique_purchase_id:
+                print (f)
+                if f == j['purchase_id']:
+                    order_data.append(dict(purchase_id=j['purchase_id'], customer_email=j['customer_email'], cdate=j['cdate']))
+                else:
+                    pass
 
-    return render_template('admin_orders.html', orders=order_data)
+        return render_template('admin_orders.html', orders=order_data)
+    except:
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/orders/details/<string:purchase_id>')
 def admin_orders_details(purchase_id):
-    query_orders = Purchase.query.filter(Purchase.purchase_id == purchase_id).all()
-    orders_details = []
-    for i in query_orders:
-        orders_details.append(dict(id=i.id, customer_email=i.customer_email, purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name,
-                           product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
+    try:
+        session['auth_admin']
+        query_orders = Purchase.query.filter(Purchase.purchase_id == purchase_id).all()
+        orders_details = []
+        for i in query_orders:
+            orders_details.append(dict(id=i.id, customer_email=i.customer_email, purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name,
+                               product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
 
-    return render_template('admin_orders_details.html', orders_details=orders_details)
+        return render_template('admin_orders_details.html', orders_details=orders_details)
+    except:
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/products', methods=['POST', 'GET'])
 def admin_products():
-    if request.method == "POST":
-        title = request.form['title']
-        description = request.form['description']
-        price = request.form['price']
-        pic = request.files['pic']
-        filename = secure_filename(pic.filename)
-        mimetype = pic.mimetype
-        if not filename or not mimetype:
-            return 'Bad upload!', 400
+    try:
+        session['auth_admin']
+        if request.method == "POST":
+            title = request.form['title']
+            description = request.form['description']
+            price = request.form['price']
+            pic = request.files['pic']
+            filename = secure_filename(pic.filename)
+            mimetype = pic.mimetype
+            if not filename or not mimetype:
+                return 'Bad upload!', 400
 
-        item = Item(title=title, price=price, description=description, img=pic.read(), name=filename, mimetype=mimetype)
-        print(item)
+            item = Item(title=title, price=price, description=description, img=pic.read(), name=filename, mimetype=mimetype)
+            print(item)
 
-        try:
-            db.session.add(item)
-            db.session.commit()
-            return redirect('/admin/products')
-        except:
-            return "Получилась ошибка"
-    else:
-        query_products = Item.query.all()
-        products = []
-        for i in query_products:
-            products.append(dict(id=i.id, title=i.title, price=i.price, description=i.description, img=i.img, name=i.name, mimetype=i.mimetype, isActive=i.isActive))
-        return render_template('admin_products.html', products=products)
+            try:
+                db.session.add(item)
+                db.session.commit()
+                return redirect('/admin/products')
+            except:
+                return "Получилась ошибка"
+        else:
+            query_products = Item.query.all()
+            products = []
+            for i in query_products:
+                products.append(dict(id=i.id, title=i.title, price=i.price, description=i.description, img=i.img, name=i.name, mimetype=i.mimetype, isActive=i.isActive))
+            return render_template('admin_products.html', products=products)
+    except:
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/customers')
 def admin_customers():
-    query_customers = Customer.query.all()
-    customers = []
-    for i in query_customers:
-        customers.append(dict(id=i.id, firstname=i.firstname, email=i.email, password=i.password, auth3rt=i.auth3rt, role=i.role, cdate=i.cdate))
-    return render_template('admin_customers.html', customers=customers)
+    try:
+        session['auth_admin']
+        query_customers = Customer.query.all()
+        customers = []
+        for i in query_customers:
+            customers.append(dict(id=i.id, firstname=i.firstname, email=i.email, password=i.password, auth3rt=i.auth3rt, role=i.role, cdate=i.cdate))
+        return render_template('admin_customers.html', customers=customers)
+    except:
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/customers/purchase/<string:email>')
 def admin_customers_purchase(email):
-    query_order = Purchase.query.filter(Purchase.customer_email == email).all()
-    orders = []
-    for i in query_order:
-        orders.append(
-            dict(purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name,
-                 product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
+    try:
+        session['auth_admin']
+        query_order = Purchase.query.filter(Purchase.customer_email == email).all()
+        orders = []
+        for i in query_order:
+            orders.append(
+                dict(purchase_id=i.purchase_id, product_id=i.product_id, product_name=i.product_name,
+                     product_description=i.product_description, price=i.price, count=i.count, cdate=i.cdate))
 
-    def groupid_purchase(d):
-        del d['purchase_id']
-        return d
+        def groupid_purchase(d):
+            del d['purchase_id']
+            return d
 
-    data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in
-            itertools.groupby(orders, operator.itemgetter('purchase_id'))]
+        data = [{'purchase_id': i, 'data': list(map(groupid_purchase, grp))} for i, grp in
+                itertools.groupby(orders, operator.itemgetter('purchase_id'))]
 
-    cdate = []
-    for p_time in data:
-        date = []
-        for data_time in p_time['data']:
-            datat_t = str(data_time['cdate'])
-            date.append(datat_t[:-10])
-        cdate.append(dict(purchase_id=p_time['purchase_id'], cdate=date[0]))
+        cdate = []
+        for p_time in data:
+            date = []
+            for data_time in p_time['data']:
+                datat_t = str(data_time['cdate'])
+                date.append(datat_t[:-10])
+            cdate.append(dict(purchase_id=p_time['purchase_id'], cdate=date[0]))
 
-    p_total = []
-    for purchase in data:
-        p_total_sum = []
-        for p_summ in purchase['data']:
-            p_total_sum.append(p_summ['price'] * p_summ['count'])
+        p_total = []
+        for purchase in data:
+            p_total_sum = []
+            for p_summ in purchase['data']:
+                p_total_sum.append(p_summ['price'] * p_summ['count'])
 
-        s_total = sum(p_total_sum)
-        p_total.append(dict(purchase_id=purchase['purchase_id'], total=s_total))
+            s_total = sum(p_total_sum)
+            p_total.append(dict(purchase_id=purchase['purchase_id'], total=s_total))
 
-    return render_template("admin_customers_orders.html", data=data, date=cdate, total=p_total)
+        return render_template("admin_customers_orders.html", data=data, date=cdate, total=p_total)
+    except:
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
