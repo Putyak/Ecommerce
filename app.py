@@ -274,6 +274,7 @@ def delete_admin_auth():
     session.pop('auth_admin', None)
     return redirect('/')
 
+
 @app.route('/signin', methods=['POST', 'GET'])
 def sign_in():
     if request.method == "POST":
@@ -324,7 +325,6 @@ def sign_in_link(email, password):
                 return "ты не авторизован"
         else:
             return "остынь парниш :) таких нет..."
-
 
 
 @app.route('/checkout', methods=['POST', 'GET'])
@@ -577,7 +577,6 @@ def admin_orders():
         order_data = []
         for j in orders:
             for f in unique_purchase_id:
-                print (f)
                 if f == j['purchase_id']:
                     order_data.append(dict(purchase_id=j['purchase_id'], customer_email=j['customer_email'], cdate=j['cdate']))
                 else:
@@ -618,7 +617,6 @@ def admin_products():
                 return 'Bad upload!', 400
 
             item = Item(title=title, price=price, description=description, img=pic.read(), name=filename, mimetype=mimetype)
-            print(item)
 
             try:
                 db.session.add(item)
