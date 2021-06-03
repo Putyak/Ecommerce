@@ -558,7 +558,7 @@ def admin_dashboard():
         return render_template('admin_dashboard.html')
 
     except:
-        return render_template('admin_dashboard.html', memo='memo')
+        return redirect('/signin')
 
 
 @app.route('/admin/orders')
@@ -584,7 +584,7 @@ def admin_orders():
 
         return render_template('admin_orders.html', orders=order_data)
     except:
-        return render_template('admin_dashboard.html', memo='memo')
+        return redirect('/signin')
 
 
 @app.route('/admin/orders/details/<string:purchase_id>')
@@ -599,7 +599,7 @@ def admin_orders_details(purchase_id):
 
         return render_template('admin_orders_details.html', orders_details=orders_details)
     except:
-        return render_template('admin_dashboard.html', memo='memo')
+        return redirect('/signin')
 
 
 @app.route('/admin/products', methods=['POST', 'GET'])
@@ -631,7 +631,7 @@ def admin_products():
                 products.append(dict(id=i.id, title=i.title, price=i.price, description=i.description, img=i.img, name=i.name, mimetype=i.mimetype, isActive=i.isActive))
             return render_template('admin_products.html', products=products)
     except:
-        return render_template('admin_dashboard.html', memo='memo')
+        return redirect('/signin')
 
 
 @app.route('/admin/customers')
@@ -644,7 +644,7 @@ def admin_customers():
             customers.append(dict(id=i.id, firstname=i.firstname, email=i.email, password=i.password, auth3rt=i.auth3rt, role=i.role, cdate=i.cdate))
         return render_template('admin_customers.html', customers=customers)
     except:
-        return render_template('admin_dashboard.html', memo='memo')
+        return redirect('/signin')
 
 
 @app.route('/admin/customers/purchase/<string:email>')
@@ -684,8 +684,13 @@ def admin_customers_purchase(email):
 
         return render_template("admin_customers_orders.html", data=data, date=cdate, total=p_total)
     except:
-        return render_template('admin_dashboard.html', memo='memo')
+        return redirect('/signin')
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('404.html'), 404
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
