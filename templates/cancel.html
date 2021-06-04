@@ -1,11 +1,32 @@
 <html>
 <head>
-  <title>Checkout canceled</title>
-  <link rel="stylesheet" href="https://putyak-ecom.herokuapp.com/templates/style.css">
+<title>Payment</title>
+<style>
+
+@import url('https://fonts.googleapis.com/css?family=Work+Sans');
+body{
+font-family: 'Work Sans', sans-serif;
+background: #00d2ff;
+background: -webkit-linear-gradient(to right, #3a7bd5, #00d2ff);
+background: linear-gradient(to right, #3a7bd5, #00d2ff);
+}
+
+.receipt{background: #ffffff; border-radius:4px; padding:5%; padding-top:25px; max-width:600px; margin:auto; margin-top:-180px; position:relative;}
+.items{color: red}
+
+</style>
 </head>
 <body>
-  <section>
-    <p>Forgot to add something to your cart? Shop around then come back to pay!</p>
-  </section>
+
+<div class="container" style="margin-top: 20%;">
+  <div class="receipt">
+    <h3 class="items">Payment was failed.</h3>
+    <p>Anyway you can try to make payment again. <br></p>
+    <a href="/">Move on site</a>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>

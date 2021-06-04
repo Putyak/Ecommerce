@@ -56,13 +56,25 @@ class Purchase(db.Model):
     cdate = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
+class Billing(db.Model):
+
+    __tablename__ = 'billing'
+    id = db.Column(db.Integer, primary_key=True)
+    purchase_id = db.Column(db.String(100), nullable=False)
+    sessionId = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(10), nullable=True)
+    currency_code = db.Column(db.String(3), nullable=False)
+    description = db.Column(db.String(100), nullable=True)
+    amount = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
 # admin.add_view(ModelView(Item, db.session))
 # admin.add_view(ModelView(Customer, db.session))
 # admin.add_view(ModelView(Purchase, db.session))
 
+db.create_all()
 
-# db.create_all()
-#
 # data = []
 # data.append(Customer(
 #         firstname="Ivan",
@@ -386,10 +398,21 @@ def checkout_cart():
         except:
             pass
 
-        message = render_template('email_order.html', data=email_order, total=product_sum_formated, email=email)
-        #email_sender(email, message)
+        try:
+            message = render_template('email_order.html', data=email_order, total=product_sum_formated, email=email)
+            email_sender(email, message)
+        except:
+            pass
 
-        return redirect('/pay_mock/')
+        url = '/stripe/' + purchase_id + '/' + 'OrderId: ' + purchase_id + '/' + str(product_sum) + '00'
+
+        try:
+            session.pop('purchase_id', None)
+            session['purchase_id'] = [{'purchase_id': purchase_id}]
+        except:
+            session['purchase_id'] = [{'purchase_id': purchase_id}]
+
+        return redirect(url)
 
     items = [i['id'] for i in session['cart_item']]
     data_set = Item.query.filter(Item.id.in_(items)).all()
@@ -686,26 +709,16 @@ def admin_customers_purchase(email):
         return render_template('admin_dashboard.html', memo='memo')
 
 
-YOUR_DOMAIN = 'http://localhost:5000'
+DOMAIN = 'http://127.0.0.1:5000'
 
 
-@app.route('/stripe', methods=['GET'])
-def payment_page():
-    return render_template('checkout.html')
+@app.route('/stripe/<purchase_id>/<description>/<amount>', methods=['GET'])
+def payment_page(purchase_id, description, amount):
+    return render_template('checkout.html', purchase_id=purchase_id, description=description, amount=amount)
 
 
-@app.route('/stripe/cancel', methods=['GET'])
-def cancel():
-    return render_template('cancel.html')
-
-
-@app.route('/stripe/success', methods=['GET'])
-def success():
-    return render_template('success.html')
-
-
-@app.route('/stripe/create-checkout-session', methods=['POST'])
-def create_checkout_session():
+@app.route('/stripe/create-checkout-session/<purchase_id>/<description>/<amount>', methods=['GET'])
+def create_checkout_session(purchase_id, description, amount):
     try:
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -713,19 +726,22 @@ def create_checkout_session():
                 {
                     'price_data': {
                         'currency': 'usd',
-                        'unit_amount': 5000,
+                        'unit_amount': amount,
                         'product_data': {
-                            'name': ' Attachments',
-                            'images': ['https://i.imgur.com/EHyR2nP.png'],
+                            'name': description,
+                            #'images': ['https://i.imgur.com/EHyR2nP.png'],
                         },
                     },
                     'quantity': 1,
                 },
             ],
             mode='payment',
-            success_url=YOUR_DOMAIN + '/stripe/success',
-            cancel_url=YOUR_DOMAIN + '/stripe/cancel',
+            success_url=DOMAIN + '/stripe/success',
+            cancel_url=DOMAIN + '/stripe/cancel',
         )
+        item = Billing(purchase_id=purchase_id, sessionId=checkout_session.id, status='Pending', currency_code='USD', amount=amount[:-2], description=description)
+        db.session.add(item)
+        db.session.commit()
         return jsonify({'id': checkout_session.id})
     except Exception as e:
         return jsonify(error=str(e)), 403
@@ -735,6 +751,40 @@ def create_checkout_session():
 def check_status_session(sessionId):
     payment_status = stripe.checkout.Session.retrieve(sessionId)
     return jsonify({'sessionId': sessionId, 'payment_status': payment_status.payment_status})
+
+
+@app.route('/stripe/cancel', methods=['GET'])
+def cancel():
+    return render_template('cancel.html')
+
+
+@app.route('/stripe/success', methods=['GET'])
+def success():
+    purchase_id = []
+    for i in session['purchase_id']:
+        purchase_id.append(dict(purchase_id=i['purchase_id']))
+
+    bill = Billing.query.filter_by(purchase_id=purchase_id[0]['purchase_id']).first()
+    bill_status = db.session.query(Billing).filter_by(purchase_id=purchase_id[0]['purchase_id']).all()
+    sessionId = []
+    for i in bill_status:
+        sessionId.append(dict(sessionId=i.sessionId))
+
+    payment = stripe.checkout.Session.retrieve(sessionId[0]['sessionId'])
+    payment_status = payment.payment_status
+    bill.status = payment_status
+    db.session.commit()
+    if payment_status == 'paid':
+        customer_orders = db.session.query(Purchase).filter_by(purchase_id=purchase_id[0]['purchase_id']).all()
+        customer_email = []
+        for i in customer_orders:
+            customer_email.append(dict(customer_email=i.customer_email))
+        session['auth_email'] = [{'email': customer_email[0]['customer_email']}]
+        session.pop('cart_item', None)
+        session.pop('purchase_id', None)
+        return render_template('success.html')
+    else:
+        return render_template('cancel.html')
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'

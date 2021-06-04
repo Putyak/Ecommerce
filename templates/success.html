@@ -1,14 +1,46 @@
 <html>
 <head>
-  <title>Thanks for your order!</title>
-  <link rel="stylesheet" href="https://putyak-ecom.herokuapp.com/templates/style.css">
+<title>Payment</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+<style>
+
+@import url('https://fonts.googleapis.com/css?family=Work+Sans');
+body{
+font-family: 'Work Sans', sans-serif;
+background: #00d2ff;
+background: -webkit-linear-gradient(to right, #3a7bd5, #00d2ff);
+background: linear-gradient(to right, #3a7bd5, #00d2ff);
+}
+
+.receipt{background: #ffffff; border-radius:4px; padding:5%; padding-top:25px; max-width:600px; margin:auto; margin-top:-180px; position:relative;}
+.items{color: green}
+
+
+
+</style>
 </head>
 <body>
-  <section>
-    <p>
-      We appreciate your business! If you have any questions, please email
-      <a href="mailto:orders@example.com">orders@example.com</a>.
-    </p>
-  </section>
+
+<div class="container" style="margin-top: 20%;">
+  <div class="receipt">
+    <h3 class="items">Payment was succesfull.</h3>
+    <p>Information send to you email address. <br> Thank you for your purchase! :) <br></p>
+      <a href="/orders">Move on site</a> <br>
+    <b>Auto redirect will be after <span id="time"> seconds.</span></b>
+    </div>
+<script type="text/javascript">
+var i = 15;//время в сек.
+function time(){
+ document.getElementById("time").innerHTML = i;//визуальный счетчик
+ i--;//уменьшение счетчика
+ if (i < 0) location.href = "/orders";//редирект
+}
+time();
+setInterval(time, 1000);
+</script>
+
+  </div>
+</div>
+
 </body>
 </html>
