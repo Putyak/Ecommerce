@@ -709,7 +709,7 @@ def admin_customers_purchase(email):
         return render_template('admin_dashboard.html', memo='memo')
 
 
-DOMAIN = 'https://putyak-ecom.herokuapp.com/'
+DOMAIN = 'https://putyak-ecom.herokuapp.com'
 
 
 @app.route('/stripe/<purchase_id>/<description>/<amount>', methods=['GET'])
