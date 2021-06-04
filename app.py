@@ -2,10 +2,12 @@ import datetime
 import uuid
 import itertools
 import operator
+import stripe
+stripe.api_key = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
 
 # from flask_admin import Admin
 # from flask_admin.contrib.sqla import ModelView
-from flask import Flask, render_template, request, redirect, session, Response
+from flask import Flask, render_template, request, redirect, session, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from email_sender import email_sender
@@ -682,6 +684,57 @@ def admin_customers_purchase(email):
         return render_template("admin_customers_orders.html", data=data, date=cdate, total=p_total)
     except:
         return render_template('admin_dashboard.html', memo='memo')
+
+
+YOUR_DOMAIN = 'http://localhost:5000'
+
+
+@app.route('/stripe', methods=['GET'])
+def payment_page():
+    return render_template('checkout.html')
+
+
+@app.route('/stripe/cancel', methods=['GET'])
+def cancel():
+    return render_template('cancel.html')
+
+
+@app.route('/stripe/success', methods=['GET'])
+def success():
+    return render_template('success.html')
+
+
+@app.route('/stripe/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                        'unit_amount': 5000,
+                        'product_data': {
+                            'name': ' Attachments',
+                            'images': ['https://i.imgur.com/EHyR2nP.png'],
+                        },
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url=YOUR_DOMAIN + '/stripe/success',
+            cancel_url=YOUR_DOMAIN + '/stripe/cancel',
+        )
+        return jsonify({'id': checkout_session.id})
+    except Exception as e:
+        return jsonify(error=str(e)), 403
+
+
+@app.route('/stripe/status/<sessionId>', methods=['GET'])
+def check_status_session(sessionId):
+    payment_status = stripe.checkout.Session.retrieve(sessionId)
+    return jsonify({'sessionId': sessionId, 'payment_status': payment_status.payment_status})
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
