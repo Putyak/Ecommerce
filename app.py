@@ -17,9 +17,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# admin = Admin(app)
-
-
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=True)
@@ -328,7 +325,7 @@ def sign_in_link(email, password):
 
 
 @app.route('/checkout', methods=['POST', 'GET'])
-def checkout():
+def checkout_cart():
     cart_counter = []
     for i in session['cart_item']:
         cart_counter.append(dict(id=i['id'], count=i['count']))
@@ -407,7 +404,7 @@ def checkout():
     product_sum = sum(data_sum)
     product_sum_formated = '{0:,}'.format(int(product_sum)).replace(',', ' ')
 
-    return render_template('checkout.html', data=data_set, cart_counter=cart_counter, product_sum_formated=product_sum_formated)
+    return render_template('checkout_cart.html', data=data_set, cart_counter=cart_counter, product_sum_formated=product_sum_formated)
 
 
 @app.route('/create', methods=['POST', 'GET'])
@@ -558,7 +555,7 @@ def admin_dashboard():
         return render_template('admin_dashboard.html')
 
     except:
-        return redirect('/signin')
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/orders')
@@ -584,7 +581,7 @@ def admin_orders():
 
         return render_template('admin_orders.html', orders=order_data)
     except:
-        return redirect('/signin')
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/orders/details/<string:purchase_id>')
@@ -599,7 +596,7 @@ def admin_orders_details(purchase_id):
 
         return render_template('admin_orders_details.html', orders_details=orders_details)
     except:
-        return redirect('/signin')
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/products', methods=['POST', 'GET'])
@@ -631,7 +628,7 @@ def admin_products():
                 products.append(dict(id=i.id, title=i.title, price=i.price, description=i.description, img=i.img, name=i.name, mimetype=i.mimetype, isActive=i.isActive))
             return render_template('admin_products.html', products=products)
     except:
-        return redirect('/signin')
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/customers')
@@ -644,7 +641,7 @@ def admin_customers():
             customers.append(dict(id=i.id, firstname=i.firstname, email=i.email, password=i.password, auth3rt=i.auth3rt, role=i.role, cdate=i.cdate))
         return render_template('admin_customers.html', customers=customers)
     except:
-        return redirect('/signin')
+        return render_template('admin_dashboard.html', memo='memo')
 
 
 @app.route('/admin/customers/purchase/<string:email>')
@@ -684,13 +681,8 @@ def admin_customers_purchase(email):
 
         return render_template("admin_customers_orders.html", data=data, date=cdate, total=p_total)
     except:
-        return redirect('/signin')
+        return render_template('admin_dashboard.html', memo='memo')
 
-
-@app.errorhandler(404)
-def page_not_found(e):
-    # note that we set the 404 status explicitly
-    return render_template('404.html'), 404
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
