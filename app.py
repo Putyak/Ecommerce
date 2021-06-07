@@ -111,6 +111,30 @@ def index():
             return render_template('index.html', data=items)
 
 
+@app.route('/test')
+def test():
+    items = Item.query.order_by(Item.price).all()
+    try:
+        cart_counter = []
+        for i in session['cart_item']:
+            cart_counter.append(dict(id=i['id'], count=i['count']))
+
+        button_visible = [i['id'] for i in session['cart_item']]
+
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('test.html', data=items, cart_counter=cart_counter, auth_email=auth_email, button_visible=button_visible)
+        except:
+            return render_template('test.html', data=items, cart_counter=cart_counter, button_visible=button_visible)
+
+    except:
+        try:
+            auth_email = session['auth_email'][0]['email']
+            return render_template('test.html', data=items, auth_email=auth_email)
+        except:
+            return render_template('test.html', data=items)
+
+
 @app.route('/about')
 def about():
     items = Item.query.order_by(Item.price).all()
