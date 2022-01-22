@@ -3,14 +3,12 @@ import uuid
 import itertools
 import operator
 import stripe
-stripe.api_key = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
 
-# from flask_admin import Admin
-# from flask_admin.contrib.sqla import ModelView
 from flask import Flask, render_template, request, redirect, session, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from email_sender import email_sender
+from configparser import ConfigParser
 
 
 app = Flask(__name__)
@@ -57,7 +55,6 @@ class Purchase(db.Model):
 
 
 class Billing(db.Model):
-
     __tablename__ = 'billing'
     id = db.Column(db.Integer, primary_key=True)
     purchase_id = db.Column(db.String(100), nullable=False)
@@ -73,7 +70,7 @@ class Billing(db.Model):
 # admin.add_view(ModelView(Customer, db.session))
 # admin.add_view(ModelView(Purchase, db.session))
 
-db.create_all()
+#db.create_all()
 
 # data = []
 # data.append(Customer(
@@ -85,6 +82,11 @@ db.create_all()
 #
 # db.session.add_all(data)
 # db.session.commit()
+
+
+file = 'config_dev.ini'
+config = ConfigParser()
+config.read(file)
 
 
 @app.route('/')
@@ -123,16 +125,16 @@ def test():
 
         try:
             auth_email = session['auth_email'][0]['email']
-            return render_template('test.html', data=items, cart_counter=cart_counter, auth_email=auth_email, button_visible=button_visible)
+            return render_template('index_old.html', data=items, cart_counter=cart_counter, auth_email=auth_email, button_visible=button_visible)
         except:
-            return render_template('test.html', data=items, cart_counter=cart_counter, button_visible=button_visible)
+            return render_template('index_old.html', data=items, cart_counter=cart_counter, button_visible=button_visible)
 
     except:
         try:
             auth_email = session['auth_email'][0]['email']
-            return render_template('test.html', data=items, auth_email=auth_email)
+            return render_template('index_old.html', data=items, auth_email=auth_email)
         except:
-            return render_template('test.html', data=items)
+            return render_template('index_old.html', data=items)
 
 
 @app.route('/about')
@@ -733,7 +735,7 @@ def admin_customers_purchase(email):
         return render_template('admin_dashboard.html', memo='memo')
 
 
-DOMAIN = 'https://putyak-ecom.herokuapp.com'
+DOMAIN = config['url']['DOMAIN']
 
 
 @app.route('/stripe/<purchase_id>/<description>/<amount>', methods=['GET'])
@@ -811,7 +813,9 @@ def success():
         return render_template('cancel.html')
 
 
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+stripe.api_key = config['key']['stripe']
+app.secret_key = config['key']['app']
+
 
 if __name__ == "__main__":
     app.run()
